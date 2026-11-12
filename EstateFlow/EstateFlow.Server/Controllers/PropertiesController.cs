@@ -160,5 +160,23 @@ namespace EstateFlow.Server.Controllers
 
             return NoContent();
         }
+        [HttpGet("{id}/images")]
+        public async Task<ActionResult<IEnumerable<PropertyImageResponse>>> GetPropertyImages(Guid id)
+        {
+            var propertyExists = await _context.Properties.AnyAsync(p => p.Id == id);
+            if (!propertyExists)
+            {
+                return NotFound();
+            }
+
+            var images = await _context.PropertyImages
+                .Where(i => i.PropertyId == id)
+                .OrderBy(i => i.UploadedAt)
+                .ProjectToType<PropertyImageResponse>()
+                .ToListAsync();
+
+            return Ok(images);
+        }
     }
+
 }
